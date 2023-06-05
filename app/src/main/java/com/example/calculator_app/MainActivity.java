@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.button.MaterialButton;
 import org.mozilla.javascript.Context;
@@ -53,8 +54,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onClick(View v) {
-        MaterialButton button = (MaterialButton) v;
+    public void onClick(View view) {
+        MaterialButton button = (MaterialButton) view;
         String buttonText = button.getText().toString();
         String inputToCalculate = solutionTv.getText().toString();
 
@@ -65,9 +66,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         if (buttonText.equals("=")){
             solutionTv.setText(resultTv.getText());
+            return;
         }
         if (buttonText.equals("C")){
-            inputToCalculate = inputToCalculate.substring(0, inputToCalculate.length() - 1);
+            if (!solutionTv.equals("")){
+                inputToCalculate = inputToCalculate.substring(0, inputToCalculate.length() - 1);
+            }
         }else{
             inputToCalculate = inputToCalculate + buttonText;
         }
@@ -75,6 +79,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         solutionTv.setText(inputToCalculate);
 
         String finalResult = getResult(inputToCalculate);
+
+        if (finalResult.equals("Infinity")){
+            resultTv.setText("");
+            Toast.makeText(getApplicationContext(), "Math Error", Toast.LENGTH_SHORT).show();
+        }
 
         if (!finalResult.equals("Err")){
             resultTv.setText(finalResult);
@@ -90,6 +99,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String finalResult = context.evaluateString(scriptable,input,"Javascript", 1, null).toString();
             if (finalResult.endsWith(".0")){
                 finalResult.replace(".0", "");
+            }
+            if (finalResult.equals("Infinity")){
+                finalResult.replace("Infinity", "");
             }
             return finalResult;
         }catch(Exception e){
